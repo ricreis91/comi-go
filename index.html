@@ -1,6 +1,7 @@
 <html lang="pt-PT">
 <head>
 <link rel="manifest" href="manifest.json">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <meta name="theme-color" content="#4CAF50">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -39,12 +40,17 @@ button, input, select {
   background-color: #1E90FF; /* azul mais escuro */
 }
 
+
 /* Botão de eliminar vermelho */
-#eliminarPersonalizado, #eliminarHistorico {
+#eliminarPersonalizado,
+#eliminarHistorico,
+#eliminarContacto {
   background-color: #f44336;
   color: white;
 }
-#eliminarPersonalizado:hover, #eliminarHistorico:hover {
+#eliminarPersonalizado:hover, 
+#eliminarHistorico:hover,
+#eliminarContacto:hover {
   background-color: #d32f2f;
 }
 
@@ -87,6 +93,20 @@ button, input, select {
 /* Lista da refeição e histórico */
 ul { padding-left: 0; list-style: none; }
 
+/* Botao whatsapp */
+#enviarWhatsApp {
+  background-color: #25D366; /* verde oficial WhatsApp */
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-weight: bold;
+}
+
+#enviarWhatsApp:hover {
+  background-color: #1ebe5d; /* verde ligeiramente mais escuro */
+}
 /* Espaço extra para histórico */
 #menuHistorico { margin-top: 30px; }
 </style>
@@ -131,13 +151,55 @@ ul { padding-left: 0; list-style: none; }
 <button id="btnHistorico">Ver Histórico ▼</button>
 <div id="menuHistorico" class="dropdown-content">
   <ul id="historicoRefeicoes"></ul>
+	<hr>
+<h3>Contactos</h3>
+
+<input type="text" id="nomeContacto" placeholder="Nome do contacto">
+<input type="text" id="numeroContacto" placeholder="Número (9 dígitos)">
+<button id="guardarContacto">Guardar Contacto</button>
+
+<select id="listaContactos">
+  <option value="">Selecionar contacto</option>
+</select>
+
+<button id="enviarWhatsApp">
+  <i class="fa-brands fa-whatsapp"></i> Enviar Histórico por WhatsApp
+</button>
+<button id="eliminarContacto">Eliminar Contacto</button>
   <button id="exportarTXT">Exportar Histórico (TXT)</button>
   <button id="eliminarHistorico">Eliminar Histórico</button>
 </div>
 
 <script>
 document.addEventListener("DOMContentLoaded", () => {
+function sugerirTipoRefeicao(){
+  const horaAtual = new Date().getHours();
+  const minutosAtuais = new Date().getMinutes();
+  const horaDecimal = horaAtual + minutosAtuais/60;
 
+  let sugestao;
+
+  if(horaDecimal >= 7 && horaDecimal < 10.5){
+    sugestao = "Pequeno-almoço";
+  }
+  else if(horaDecimal >= 10.5 && horaDecimal < 12){
+    sugestao = "Lanche da manhã";
+  }
+  else if(horaDecimal >= 12 && horaDecimal < 15){
+    sugestao = "Almoço";
+  }
+  else if(horaDecimal >= 15 && horaDecimal < 18.5){
+    sugestao = "Lanche da tarde";
+  }
+  else if(horaDecimal >= 18.5 && horaDecimal < 22){
+    sugestao = "Jantar";
+  }
+  else{
+    sugestao = "Snack";
+  }
+
+  tipoRefeicaoSelect.value = sugestao;
+}
   // --- NOME DE UTILIZADOR ---
   let nomeUsuario = localStorage.getItem("nomeUsuario") || "";
   const oláUsuario = document.getElementById("oláUsuario");
@@ -179,7 +241,10 @@ function abrirMenu(menuId) {
     }
   });
 }
-  document.getElementById("btnCriar").addEventListener("click", ()=> abrirMenu("menuCriar"));
+  document.getElementById("btnCriar").addEventListener("click", ()=> {
+  abrirMenu("menuCriar");
+  sugerirTipoRefeicao();
+});
   document.getElementById("btnAdicionar").addEventListener("click", ()=> abrirMenu("menuAdicionar"));
   document.getElementById("btnHistorico").addEventListener("click", ()=> abrirMenu("menuHistorico"));
 
@@ -401,6 +466,14 @@ function abrirMenu(menuId) {
   const btnEliminar = document.getElementById("eliminarPersonalizado");
   const btnEliminarHistorico = document.getElementById("eliminarHistorico");
 
+const nomeContacto = document.getElementById("nomeContacto");
+const numeroContacto = document.getElementById("numeroContacto");
+const guardarContactoBtn = document.getElementById("guardarContacto");
+const listaContactos = document.getElementById("listaContactos");
+const enviarWhatsAppBtn = document.getElementById("enviarWhatsApp");
+const eliminarContactoBtn = document.getElementById("eliminarContacto");
+
+
   // --- PERSONALIZADOS ---
   let refeicao = [];
   let personalizados = JSON.parse(localStorage.getItem("ingredientesPersonalizados") || "{}");
@@ -460,7 +533,7 @@ function abrirMenu(menuId) {
       listaRefeicao.appendChild(li);
       totalHC += (tabela[item.ingrediente]/100)*item.peso;
     });
-    resultado.textContent=`Hidratos de carbono totais: ${totalHC.toFixed(1)} g`;
+    resultado.textContent=`Hidratos de carbono totais: ${totalHC.toFixed(2)} g`;
   }
 
   // --- Guardar Ingrediente Personalizado ---
@@ -505,12 +578,97 @@ function abrirMenu(menuId) {
     let historico = JSON.parse(localStorage.getItem("historicoRefeicoes")||"[]");
     historico.forEach((ref)=>{
       const li=document.createElement("li");
-      li.innerHTML=`<strong>${ref.tipo}</strong> (${ref.hora}): ${ref.itens.map(it=>it.ingrediente+" "+it.peso+"g").join(", ")} - Total HC: ${ref.totalHC.toFixed(1)}g`;
+      li.innerHTML=`<strong>${ref.tipo}</strong> (${ref.hora}): ${ref.itens.map(it=>it.ingrediente+" "+it.peso+"g").join(", ")} - Total HC: ${ref.totalHC.toFixed(2)}g`;
       historicoUL.appendChild(li);
     });
   }
   atualizarHistorico();
 
+// ----Contactos----
+let contactos = JSON.parse(localStorage.getItem("contactos") || "[]");
+
+function atualizarListaContactos(){
+  listaContactos.innerHTML = '<option value="">Selecionar contacto</option>';
+  contactos.forEach((c, index)=>{
+    const option = document.createElement("option");
+    option.value = index;
+    option.textContent = `${c.nome} (${c.numero})`;
+    listaContactos.appendChild(option);
+  });
+}
+
+atualizarListaContactos();
+guardarContactoBtn.addEventListener("click", ()=>{
+
+  const nome = nomeContacto.value.trim();
+  const numero = numeroContacto.value.trim();
+
+  if(!nome) return alert("Insere o nome do contacto.");
+
+  if(!/^9\d{8}$/.test(numero)){
+  return alert("O número deve começar por 9 e ter exatamente 9 dígitos.");
+}
+// Verificar duplicados
+const duplicado = contactos.some(c =>
+  c.nome.toLowerCase() === nome.toLowerCase() ||
+  c.numero === numero
+);
+
+if(duplicado){
+  return alert("Já existe um contacto com esse nome ou número.");
+}
+  contactos.push({nome, numero});
+  localStorage.setItem("contactos", JSON.stringify(contactos));
+
+  nomeContacto.value = "";
+  numeroContacto.value = "";
+
+  atualizarListaContactos();
+
+  alert("Contacto guardado com sucesso!");
+});
+enviarWhatsAppBtn.addEventListener("click", ()=>{
+
+  const indice = listaContactos.value;
+  if(indice === "") return alert("Seleciona um contacto.");
+
+  const historico = JSON.parse(localStorage.getItem("historicoRefeicoes")||"[]");
+  if(historico.length===0) return alert("Não há histórico para enviar.");
+
+  const contacto = contactos[indice];
+
+  // 🔹 CABEÇALHO COM NOME DO UTILIZADOR
+  const cabecalho = `Histórico de Refeições do Utilizador:  ${nomeUsuario || "Utilizador"}:\n\n`;
+
+  // 🔹 CORPO DA MENSAGEM
+  const corpo = historico.map(ref=>
+    `${ref.tipo} (${ref.hora}): ${ref.itens.map(it=>it.ingrediente+" "+it.peso+"g").join(", ")} - Total HC: ${ref.totalHC.toFixed(2)}g`
+  ).join("\n");
+
+  const mensagem = cabecalho + corpo;
+
+  const mensagemCodificada = encodeURIComponent(mensagem);
+
+  const numeroCompleto = "351" + contacto.numero;
+  const url = `https://wa.me/${numeroCompleto}?text=${mensagemCodificada}`;
+
+  window.open(url, "_blank");
+});
+//---eliminar contacto----
+eliminarContactoBtn.addEventListener("click", ()=>{
+
+  const indice = listaContactos.value;
+
+  if(indice === ""){
+    return alert("Seleciona um contacto para eliminar.");
+  }
+
+  if(confirm("Deseja realmente eliminar este contacto?")){
+    contactos.splice(indice, 1);
+    localStorage.setItem("contactos", JSON.stringify(contactos));
+    atualizarListaContactos();
+  }
+});
   // --- Exportar TXT ---
   btnExportar.addEventListener("click", ()=>{
     let historico = JSON.parse(localStorage.getItem("historicoRefeicoes")||"[]");
