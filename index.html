@@ -224,23 +224,26 @@ function abrirMenu(menuId) {
   menus.forEach(m => {
     const el = document.getElementById(m);
     if (m === menuId) {
-      // alterna a própria aba
       el.style.display = el.style.display === "block" ? "none" : "block";
     } else {
-      el.style.display = "none"; // fecha todas as outras
+      el.style.display = "none";
     }
   });
 
-  // Mostrar ou esconder botões principais
   const abaAberta = document.getElementById(menuId).style.display === "block";
+
   botoesPrincipais.forEach(btnId => {
     const btn = document.getElementById(btnId);
     if (abaAberta && btnId !== "btn" + menuId.replace("menu","")) {
-      btn.style.display = "none"; // escondemos os outros botões
+      btn.style.display = "none";
     } else {
-      btn.style.display = "block"; // todos os botões aparecem se nenhuma aba aberta
+      btn.style.display = "block";
     }
   });
+
+  // 🔹 NOVO BLOCO
+  const btnMudarNome = document.getElementById("btnMudarNome");
+  btnMudarNome.style.display = abaAberta ? "none" : "block";
 }
   document.getElementById("btnCriar").addEventListener("click", ()=> {
   abrirMenu("menuCriar");
@@ -703,4 +706,3 @@ eliminarContactoBtn.addEventListener("click", ()=>{
 </script>
 </body>
 </html>
-
