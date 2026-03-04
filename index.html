@@ -646,7 +646,7 @@ enviarWhatsAppBtn.addEventListener("click", ()=>{
   const contacto = contactos[indice];
 
   // 🔹 CABEÇALHO COM NOME DO UTILIZADOR
-  const cabecalho = `Histórico de Refeições do Utilizador:  ${nomeUsuario || "Utilizador"}\n\n`;
+  const cabecalho = `Histórico de Refeições:  ${nomeUsuario || "Utilizador"}\n\n`;
 
   // 🔹 CORPO DA MENSAGEM
   const corpo = historico.map(ref=>
@@ -703,3 +703,4 @@ eliminarContactoBtn.addEventListener("click", ()=>{
 </script>
 </body>
 </html>
+
