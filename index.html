@@ -152,12 +152,6 @@ ul { padding-left: 0; list-style: none; }
 <div id="menuHistorico" class="dropdown-content">
   <ul id="historicoRefeicoes"></ul>
 	<hr>
-<h3>Contactos</h3>
-
-<input type="text" id="nomeContacto" placeholder="Nome do contacto">
-<input type="text" id="numeroContacto" placeholder="Número (9 dígitos)">
-<button id="guardarContacto">Guardar Contacto</button>
-
 <select id="listaContactos">
   <option value="">Selecionar contacto</option>
 </select>
@@ -165,6 +159,13 @@ ul { padding-left: 0; list-style: none; }
 <button id="enviarWhatsApp">
   <i class="fa-brands fa-whatsapp"></i> Enviar Histórico por WhatsApp
 </button>
+<h3>Contactos</h3>
+
+<input type="text" id="nomeContacto" placeholder="Nome do contacto">
+<input type="text" id="numeroContacto" placeholder="Número (9 dígitos)">
+<button id="guardarContacto">Guardar Contacto</button>
+
+
 <button id="eliminarContacto">Eliminar Contacto</button>
   <button id="exportarTXT">Exportar Histórico (TXT)</button>
   <button id="eliminarHistorico">Eliminar Histórico</button>
@@ -562,9 +563,16 @@ const eliminarContactoBtn = document.getElementById("eliminarContacto");
   btnGravarRefeicao.addEventListener("click", ()=>{
     if(refeicao.length===0) return alert("Adiciona pelo menos um ingrediente.");
     const tipo = tipoRefeicaoSelect.value;
-    const hora = new Date().toLocaleTimeString();
+    const agora = new Date();
+
+const dia = String(agora.getDate()).padStart(2, "0");
+const mes = String(agora.getMonth() + 1).padStart(2, "0");
+const hora = String(agora.getHours()).padStart(2, "0");
+const minutos = String(agora.getMinutes()).padStart(2, "0");
+
+const dataHora = `${dia}/${mes} - ${hora}:${minutos}`;
     const totalHC = refeicao.reduce((sum,it)=>sum+(tabela[it.ingrediente]/100)*it.peso,0);
-    const novaRefeicao = {hora,tipo,itens:[...refeicao], totalHC};
+    const novaRefeicao = {dataHora, tipo, itens:[...refeicao], totalHC};
     let historico = JSON.parse(localStorage.getItem("historicoRefeicoes")||"[]");
     historico.push(novaRefeicao);
     localStorage.setItem("historicoRefeicoes", JSON.stringify(historico));
@@ -578,7 +586,7 @@ const eliminarContactoBtn = document.getElementById("eliminarContacto");
     let historico = JSON.parse(localStorage.getItem("historicoRefeicoes")||"[]");
     historico.forEach((ref)=>{
       const li=document.createElement("li");
-      li.innerHTML=`<strong>${ref.tipo}</strong> (${ref.hora}): ${ref.itens.map(it=>it.ingrediente+" "+it.peso+"g").join(", ")} - Total HC: ${ref.totalHC.toFixed(2)}g`;
+      li.innerHTML=`<strong>${ref.tipo}</strong> (${ref.dataHora}): ${ref.itens.map(it=>it.ingrediente+" "+it.peso+"g").join(", ")} - Total HC: ${ref.totalHC.toFixed(2)}g`;
       historicoUL.appendChild(li);
     });
   }
@@ -638,11 +646,11 @@ enviarWhatsAppBtn.addEventListener("click", ()=>{
   const contacto = contactos[indice];
 
   // 🔹 CABEÇALHO COM NOME DO UTILIZADOR
-  const cabecalho = `Histórico de Refeições do Utilizador:  ${nomeUsuario || "Utilizador"}:\n\n`;
+  const cabecalho = `Histórico de Refeições do Utilizador:  ${nomeUsuario || "Utilizador"}\n\n`;
 
   // 🔹 CORPO DA MENSAGEM
   const corpo = historico.map(ref=>
-    `${ref.tipo} (${ref.hora}): ${ref.itens.map(it=>it.ingrediente+" "+it.peso+"g").join(", ")} - Total HC: ${ref.totalHC.toFixed(2)}g`
+    `${ref.tipo} (${ref.dataHora}): ${ref.itens.map(it=>it.ingrediente+" "+it.peso+"g").join(", ")} - Total HC: ${ref.totalHC.toFixed(2)}g`
   ).join("\n");
 
   const mensagem = cabecalho + corpo;
